@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Jam Digital Masjid Modern - Tampilan TV Masjid Al Ikhlas" />
+  <title>Jam Digital Masjid Al Ikhlas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ================================================
+     🟦 TOP BAR — INFORMASI KEUANGAN
+================================================ -->
+<div id="top-bar">
+
+  <!-- Kiri: Tombol Pengaturan + Nama Masjid -->
+  <div class="topbar-left">
+    <button id="btn-settings" title="Pengaturan" aria-label="Buka Pengaturan">⚙️</button>
+    <span class="masjid-label">Masjid Al Ikhlas Adi Sucipto</span>
+  </div>
+
+  <!-- Tengah: Data Keuangan -->
+  <div class="finance-ticker">
+    <span id="fin-loading" class="fin-loading">Memuat data keuangan…</span>
+    <div id="fin-data" class="finance-ticker hidden">
+      <div class="fin-item">
+        <span class="fin-label">+ Pemasukan</span>
+        <span class="fin-value income" id="fin-income">Rp 0</span>
+      </div>
+      <div class="fin-divider"></div>
+      <div class="fin-item">
+        <span class="fin-label">- Pengeluaran</span>
+        <span class="fin-value expense" id="fin-expense">Rp 0</span>
+      </div>
+      <div class="fin-divider"></div>
+      <div class="fin-item">
+        <span class="fin-label">= Saldo</span>
+        <span class="fin-value balance" id="fin-balance">Rp 0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Kanan: Tanggal -->
+  <div class="topbar-date">
+    <div class="topbar-date-masehi" id="topbar-date-masehi">Memuat…</div>
+    <div class="topbar-date-hijri" id="topbar-date-hijri">— H</div>
+  </div>
+
+</div>
+
+<!-- ================================================
+     🖥️ MAIN APP (Left + Right)
+================================================ -->
+<div id="app">
+
+  <!-- ============ LEFT PANEL ============ -->
+  <div id="left-panel">
+
+    <!-- Jam Digital -->
+    <div id="clock-card">
+      <div id="clock-main-wrap">
+        <div id="clock-time">00:00</div>
+        <div id="clock-seconds">00</div>
+      </div>
+      <div id="clock-divider"></div>
+    </div>
+
+    <!-- Countdown Shalat Berikutnya -->
+    <div id="countdown-card">
+      <div id="countdown-next-prayer">—</div>
+      <div id="countdown-timer">00:00:00</div>
+      <div id="countdown-status"></div>
+    </div>
+
+    <!-- Hidden elements for JS compatibility -->
+    <div id="next-prayer-info" style="display:none">
+      <div class="npi-icon" id="npi-icon">🕌</div>
+      <div class="npi-body">
+        <div class="npi-title">Shalat Berikutnya</div>
+        <div class="npi-name" id="npi-name">—</div>
+        <div class="npi-time" id="npi-time">—</div>
+      </div>
+    </div>
+
+    <!-- Nasihat / Info Tambahan -->
+    <div id="nasihat-card">
+      <div id="nasihat-label">📌 NASIHAT &amp; INFO</div>
+      <div id="nasihat-text">Mohon menonaktifkan telepon genggam saat berada di dalam Masjid.</div>
+    </div>
+
+  </div><!-- end left-panel -->
+
+  <!-- ============ RIGHT PANEL (Slideshow) ============ -->
+  <div id="right-panel">
+    <div id="slideshow">
+      <!-- Slides will be injected here by JS -->
+    </div>
+    <div id="slide-dots"></div>
+  </div>
+
+</div><!-- end app -->
+
+<!-- ================================================
+     🕌 JADWAL SHALAT (Bottom Bar)
+================================================ -->
+<div id="bottom-bar">
+  <div id="bottom-title">Jadwal Shalat — Kota Solo (WIB)</div>
+  <div id="prayer-schedule">
+    <!-- Prayer cards rendered by JS -->
+  </div>
+</div>
+
+<!-- ================================================
+     🔔 ADZAN OVERLAY
+================================================ -->
+<div id="adzan-overlay" role="dialog" aria-modal="true" aria-label="Waktu Shalat">
+  <div class="adzan-ornament">✦</div>
+  <div id="adzan-title">WAKTU SHALAT</div>
+  <div id="adzan-prayer-name">Dzuhur</div>
+  <button id="adzan-dismiss">Tutup Overlay</button>
+</div>
+
+<!-- ================================================
+     ⏱ IQOMAH OVERLAY
+================================================ -->
+<div id="iqomah-overlay" role="dialog" aria-modal="true" aria-label="Iqomah">
+  <div class="iq-title">IQOMAH</div>
+  <div class="iq-name">Dzuhur</div>
+  <div class="iq-text">Segera berwudhu &amp; membentuk shaf</div>
+  <div id="iqomah-timer-display" style="font-family:'Poppins',sans-serif; font-size:120px; font-weight:800; color:var(--accent-gold); margin:20px 0;">00:00</div>
+</div>
+
+<!-- ================================================
+     ⚙️ SETTINGS MODAL
+================================================ -->
+<div id="settings-overlay" role="dialog" aria-modal="true" aria-label="Pengaturan">
+  <div id="settings-modal">
+    <div class="modal-header">
+      <span class="modal-title">⚙️ Pengaturan</span>
+      <button class="modal-close" id="modal-close" aria-label="Tutup">✕</button>
+    </div>
+
+    <!-- Info / Nasihat -->
+    <div class="modal-section">
+      <div class="modal-section-title">📌 Nasihat &amp; Info Masjid</div>
+      <div class="form-row" style="flex-direction:column; align-items:flex-start; gap:6px;">
+        <label class="form-label" for="input-nasihat">Teks Nasihat <small style="font-weight:normal;color:#999">(Pisahkan dengan baris baru untuk info bergantian)</small></label>
+        <textarea id="input-nasihat" class="form-input wide" rows="4" placeholder="Info 1&#10;Info 2&#10;Info 3"></textarea>
+      </div>
+      <div class="form-row" style="margin-top: 10px;">
+        <label class="form-label" for="input-nasihat-interval">Lama tampil (detik)</label>
+        <input type="number" id="input-nasihat-interval" class="form-input" min="3" max="60" value="10" />
+      </div>
+    </div>
+
+    <!-- Durasi Iqomah -->
+    <div class="modal-section">
+      <div class="modal-section-title">⏱ Durasi Iqomah (menit)</div>
+
+      <div class="form-row">
+        <label class="form-label" for="iq-subuh">🌙 Subuh</label>
+        <input type="number" id="iq-subuh" class="form-input" min="0" max="30" value="7" />
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="iq-dzuhur">☀️ Dzuhur</label>
+        <input type="number" id="iq-dzuhur" class="form-input" min="0" max="30" value="10" />
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="iq-ashar">🌤️ Ashar</label>
+        <input type="number" id="iq-ashar" class="form-input" min="0" max="30" value="10" />
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="iq-maghrib">🌆 Maghrib</label>
+        <input type="number" id="iq-maghrib" class="form-input" min="0" max="30" value="5" />
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="iq-isya">🌙 Isya</label>
+        <input type="number" id="iq-isya" class="form-input" min="0" max="30" value="10" />
+      </div>
+    </div>
+
+    <!-- Suara & Iqomah Toggles -->
+    <div class="modal-section">
+      <div class="modal-section-title">🔊 Audio &amp; Notifikasi</div>
+
+      <div class="form-row">
+        <label class="form-label">Suara Adzan</label>
+        <div class="toggle-wrap">
+          <label class="toggle">
+            <input type="checkbox" id="toggle-sound" checked />
+            <span class="toggle-slider"></span>
+          </label>
+          <span class="toggle-label">Aktif</span>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label class="form-label">Countdown Iqomah</label>
+        <div class="toggle-wrap">
+          <label class="toggle">
+            <input type="checkbox" id="toggle-iqomah" checked />
+            <span class="toggle-slider"></span>
+          </label>
+          <span class="toggle-label">Aktif</span>
+        </div>
+      </div>
+
+      <!-- Test Buttons -->
+      <div class="form-row" style="margin-top: 14px; gap: 10px; flex-wrap: wrap;">
+        <button id="btn-test-adzan" class="btn-save" style="flex:1; background:var(--accent); font-size: 13px;">🔊 Test Adzan</button>
+        <button id="btn-test-iqomah" class="btn-save" style="flex:1; background:var(--accent-gold); color:#000; font-size: 13px;">⏱ Test Iqomah</button>
+      </div>
+    </div>
+
+    <!-- Slideshow -->
+    <div class="modal-section">
+      <div class="modal-section-title">🖼️ Slideshow</div>
+      <div class="form-row">
+        <label class="form-label" for="input-slideshow-interval">Interval (detik)</label>
+        <input type="number" id="input-slideshow-interval" class="form-input" min="3" max="60" value="7" />
+      </div>
+    </div>
+
+    <!-- Spreadsheet -->
+    <div class="modal-section">
+      <div class="modal-section-title">💰 Data Keuangan (Google Spreadsheet)</div>
+      <div class="form-row" style="flex-direction:column; align-items:flex-start; gap:6px;">
+        <label class="form-label" for="input-spreadsheet">
+          URL JSON/Opensheet<br>
+          <span style="font-size:10px; color: var(--text-muted);">
+            Contoh: https://opensheet.elk.sh/[SHEET_ID]/[TAB_NAME]
+          </span>
+        </label>
+        <input type="url" id="input-spreadsheet" class="form-input wide"
+               placeholder="https://opensheet.elk.sh/..." />
+      </div>
+    </div>
+
+    <button class="btn-save" id="btn-save-settings">💾 Simpan Pengaturan</button>
+  </div>
+</div>
+
+<!-- ================================================
+     TOAST NOTIFICATION
+================================================ -->
+<div id="toast" style="
+  position:fixed; bottom:130px; left:50%; transform:translateX(-50%) translateY(20px);
+  background:#23262f; border:1px solid #32364a; color:#eaeaea;
+  padding:10px 22px; border-radius:50px; font-size:13px;
+  opacity:0; transition:all 0.3s; z-index:9999; pointer-events:none;
+  white-space:nowrap;
+"></div>
+
+<style>
+  #toast.show {
+    opacity: 1 !important;
+    transform: translateX(-50%) translateY(0) !important;
+  }
+</style>
+
+<script src="script.js"></script>
+</body>
+</html>
