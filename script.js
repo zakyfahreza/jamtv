@@ -24,8 +24,8 @@ const DEFAULT_CONFIG = {
   slideshowInterval: 7,  // detik
   iqomahEnabled: true,
   nasihatInterval: 10,   // detik
-  nasihatText: 'Mohon menonaktifkan telepon genggam saat berada di dalam Masjid.\nLuruskan dan rapatkan shaf shalat.',
-  masjidName: 'Masjid Al Ikhlas Adi Sucipto'
+  nasihatText: 'Mari makmurkan masjid dengan menjaga shalat berjamaah tepat waktu\n\nJangan lupa membaca Al-Qur’an setiap hari walau hanya beberapa ayat\n\nKebersihan masjid adalah tanggung jawab bersama. Mari jaga kebersihan rumah Allah\n\nPerbanyak shalawat dan dzikir agar hati menjadi tenang dan penuh keberkahan\n\nMatikan atau senyapkan ponsel saat berada di dalam masjid demi kekhusyukan ibadah',
+  masjidName: 'Masjid Al Ikhlas Adi Sucipto, Jajar'
 };
 
 // Jadwal shalat static fallback untuk Kota Solo (WIB)
@@ -88,7 +88,7 @@ function loadConfig() {
   }
 
   // Update UI with config
-  document.getElementById('masjid-name-display').textContent = config.masjidName || 'Masjid Al Ikhlas Adi Sucipto';
+  document.getElementById('masjid-name-display').textContent = config.masjidName || 'Masjid Al Ikhlas Adi Sucipto, Jajar';
   startNasihatRotation();
 }
 
@@ -661,7 +661,7 @@ function openSettings() {
   document.getElementById('input-slideshow-interval').value = config.slideshowInterval || 7;
   document.getElementById('input-nasihat').value = config.nasihatText || '';
   document.getElementById('input-nasihat-interval').value = config.nasihatInterval || 10;
-  document.getElementById('input-masjid-name').value = config.masjidName || 'Masjid Al Ikhlas Adi Sucipto';
+  document.getElementById('input-masjid-name').value = config.masjidName || 'Masjid Al Ikhlas Adi Sucipto, Jajar';
   document.getElementById('settings-overlay').classList.add('show');
 }
 
@@ -680,7 +680,7 @@ function saveSettings() {
   config.slideshowInterval = parseInt(document.getElementById('input-slideshow-interval').value) || 7;
   config.nasihatText     = document.getElementById('input-nasihat').value.trim();
   config.nasihatInterval = parseInt(document.getElementById('input-nasihat-interval').value) || 10;
-  config.masjidName      = document.getElementById('input-masjid-name').value.trim() || 'Masjid Al Ikhlas Adi Sucipto';
+  config.masjidName      = document.getElementById('input-masjid-name').value.trim() || 'Masjid Al Ikhlas Adi Sucipto, Jajar';
 
   saveConfig();
   closeSettings();
