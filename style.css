@@ -82,7 +82,7 @@ body {
   justify-content: center;
   cursor: pointer;
   font-size: 20px;
-  transition: background var(--transition), transform var(--transition);
+  transition: background var(--transition);
   flex-shrink: 0;
   position: relative;
   /* NOT fixed */
@@ -91,7 +91,6 @@ body {
 
 #btn-settings:hover {
   background: var(--accent2);
-  transform: rotate(30deg);
 }
 
 #top-bar .masjid-label {
@@ -236,7 +235,6 @@ body {
   line-height: 1;
   color: var(--text-primary);
   letter-spacing: 2px;
-  text-shadow: 0 0 40px rgba(108, 158, 110, 0.3);
   padding-right: 48px;
   /* space for seconds */
 }
@@ -244,11 +242,11 @@ body {
 /* Detik — pojok kanan atas jam */
 #clock-seconds {
   font-family: 'Poppins', sans-serif;
-  font-size: 32px;
+  font-size: 22px;
   font-weight: 700;
   color: var(--accent);
   position: absolute;
-  top: 8px;
+  top: 10px;
   right: 0;
   letter-spacing: 1px;
   line-height: 1;
@@ -363,7 +361,7 @@ body {
 
 #nasihat-text {
   font-size: 20px;
-  color: var(--text-secondary);
+  color: #ffffff;
   line-height: 1.6;
   font-style: italic;
   overflow: hidden;
@@ -406,11 +404,11 @@ body {
 
 /* Slide dots */
 #slide-dots {
+  display: none;
   position: absolute;
   bottom: 12px;
   left: 50%;
   transform: translateX(-50%);
-  display: flex;
   gap: 7px;
   z-index: 10;
 }
@@ -672,6 +670,26 @@ body {
 #iqomah-overlay .iq-text {
   font-size: 18px;
   color: var(--text-secondary);
+}
+
+/* =========================================
+   JUMAT OVERLAY
+   ========================================= */
+#jumat-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 18, 25, 0.98);
+  z-index: 1001;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  animation: fadeIn 0.5s ease;
+}
+
+#jumat-overlay.show {
+  display: flex;
 }
 
 /* =========================================

@@ -28,14 +28,14 @@ jamtv/
 | Fitur | Keterangan |
 |---|---|
 | 🕐 Jam Digital | Format HH:mm + detik, real-time |
-| 📅 Tanggal | Masehi (Bahasa Indonesia) + Hijriyah otomatis |
+| 📅 Tanggal | Masehi (Bahasa Indonesia) + Hijriyah (Akurat Tabular Islamic) |
 | 🕌 Jadwal Shalat | Dari API Kemenag via myquran.com (Solo/WIB), fallback static |
 | ⏳ Countdown | Hitung mundur ke waktu shalat berikutnya |
 | 🔔 Notifikasi Adzan | Overlay + audio adzan.mp3 |
 | ⏱ Countdown Iqomah | Bisa diatur per waktu shalat |
-| 🖼️ Slideshow | Auto-loop gambar dari folder /slides |
-| 💰 Keuangan | Integrasi Google Spreadsheet (via Opensheet) |
-| ⚙️ Pengaturan | Modal UI, tersimpan di localStorage |
+| 📢 Khutbah Jum'at | Notifikasi otomatis selama 15 menit khusus hari Jum'at |
+| 🖼️ Slideshow | Auto-loop 5 gambar dari folder /slides |
+| ⚙️ Pengaturan | Modal UI, identitas nama masjid, tes notifikasi, tersimpan di localStorage |
 
 ---
 
@@ -64,33 +64,23 @@ Tambahkan gambar ke folder `/slides/` dengan nama:
 - `slide1.png` (atau .jpg)
 - `slide2.png`
 - `slide3.png`
-- ... dst.
+- `slide4.png`
+- `slide5.png`
 
 > Ukuran rekomendasi: **1280×720** atau **1920×1080** (rasio 16:9)
 
----
 
-## 💰 Integrasi Data Keuangan
-
-1. Buat Google Spreadsheet dengan kolom: `Tanggal`, `Keterangan`, `Pemasukan`, `Pengeluaran`
-2. Publish spreadsheet ke web (File → Share → Publish to web)
-3. Gunakan [opensheet.elk.sh](https://opensheet.elk.sh) untuk konversi ke JSON:
-   ```
-   https://opensheet.elk.sh/[SPREADSHEET_ID]/[NAMA_SHEET]
-   ```
-4. Masukkan URL tersebut di **⚙️ Pengaturan → Data Keuangan**
-
----
 
 ## ⚙️ Pengaturan (Settings Modal)
 
 Buka dengan klik tombol **⚙️** di pojok kiri atas:
 
+- **Identitas Masjid** — Ganti nama masjid pada header utama
+- **Nasihat & Info** — Ganti teks berjalan/berputar pada info board
 - **Durasi Iqomah** — Atur per waktu shalat (dalam menit)
-- **Toggle Suara** — Aktif/nonaktif audio adzan
-- **Toggle Iqomah** — Aktif/nonaktif countdown iqomah
+- **Toggle Suara & Iqomah** — Aktif/nonaktifkan audio dan fungsi countdown iqomah
+- **Test Buttons** — Tombol simulasi untuk *Test Adzan*, *Test Iqomah*, dan *Test Jumat*
 - **Interval Slideshow** — Ganti durasi tiap slide (detik)
-- **URL Spreadsheet** — Link data keuangan
 
 Semua pengaturan disimpan otomatis ke `localStorage`.
 
@@ -101,7 +91,6 @@ Semua pengaturan disimpan otomatis ke `localStorage`.
 | API | Tujuan |
 |---|---|
 | [api.myquran.com](https://api.myquran.com/) | Jadwal shalat otomatis (Data Kemenag RI) |
-| [opensheet.elk.sh](https://opensheet.elk.sh) | Konversi Google Sheets → JSON |
 
 ---
 
@@ -119,7 +108,7 @@ Semua pengaturan disimpan otomatis ke `localStorage`.
 
 ```
 ┌─────────────────────────────────────────────┐
-│ 🕌 Masjid Al Ikhlas  │ 💰 Keuangan  │ [Period] │ ← Top Bar
+│ ⚙️ Masjid Al Ikhlas Adi Sucipto             │ ← Top Bar
 ├────────────────┬────────────────────────────┤
 │  ┌──────────┐  │                            │
 │  │  Jam     │  │       SLIDESHOW            │

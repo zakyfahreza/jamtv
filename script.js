@@ -24,7 +24,8 @@ const DEFAULT_CONFIG = {
   slideshowInterval: 7,  // detik
   iqomahEnabled: true,
   nasihatInterval: 10,   // detik
-  nasihatText: 'Mohon menonaktifkan telepon genggam saat berada di dalam Masjid.\nLuruskan dan rapatkan shaf shalat.'
+  nasihatText: 'Mohon menonaktifkan telepon genggam saat berada di dalam Masjid.\nLuruskan dan rapatkan shaf shalat.',
+  masjidName: 'Masjid Al Ikhlas Adi Sucipto'
 };
 
 // Jadwal shalat static fallback untuk Kota Solo (WIB)
@@ -87,6 +88,7 @@ function loadConfig() {
   }
 
   // Update UI with config
+  document.getElementById('masjid-name-display').textContent = config.masjidName || 'Masjid Al Ikhlas Adi Sucipto';
   startNasihatRotation();
 }
 
@@ -126,45 +128,61 @@ function saveConfig() {
 // ============================================================
 function toHijri(date) {
   // Algoritma konversi Gregorian → Hijriyah
-  const jd = gregorianToJulian(date.getFullYear(), date.getMonth() + 1, date.getDate());
-  return julianToHijri(jd);
-}
+  // Dikalibrasi terhadap kalender Indonesia:
+  // 7 Mei 2026 = 19 Dzulqa'dah 1447 H (epoch 1948441, offset tahun -30)
+  const y = date.getFullYear();
+  const m = date.getMonth() + 1;
+  const d = date.getDate();
 
-function gregorianToJulian(year, month, day) {
-  if (month <= 2) { year--; month += 12; }
-  const A = Math.floor(year / 100);
-  const B = 2 - A + Math.floor(A / 4);
-  return Math.floor(365.25 * (year + 4716)) + Math.floor(30.6001 * (month + 1)) + day + B - 1524.5;
-}
+  // Julian Day Number (Gregorian)
+  const a = Math.floor((14 - m) / 12);
+  const yAdj = y + 4800 - a;
+  const mAdj = m + 12 * a - 3;
+  const jdn = d
+    + Math.floor((153 * mAdj + 2) / 5)
+    + 365 * yAdj
+    + Math.floor(yAdj / 4)
+    - Math.floor(yAdj / 100)
+    + Math.floor(yAdj / 400)
+    - 32045;
 
-function julianToHijri(jd) {
-  const z = Math.floor(jd + 0.5);
-  const a = z;
-  let year, month, day;
-  const I = Math.floor((a - 1867216.25) / 36524.25);
-  const b = a + I - Math.floor(I / 4) + 1525;
-  const c = Math.floor((b - 122.1) / 365.25);
-  const d = Math.floor(365.25 * c);
-  const e = Math.floor((b - d) / 30.6001);
-  day = b - d - Math.floor(30.6001 * e);
-  month = (e < 14) ? e - 1 : e - 13;
-  year = (month > 2) ? c - 4716 : c - 4715;
-
-  // Gregorian to Hijri conversion
-  const l = z - 1948440 + 10632;
-  const n = Math.floor((l - 1) / 10631);
-  const L = l - 10631 * n + 354;
-  const j = Math.floor((10985 - L) / 5316) * Math.floor((50 * L) / 17719) + Math.floor(L / 5670) * Math.floor((43 * L) / 15238);
-  const L2 = L - Math.floor((30 - j) / 15) * Math.floor((17719 * j) / 50) - Math.floor(j / 16) * Math.floor((15238 * j) / 43) + 29;
-  const hMonth = Math.floor((24 * L2) / 709);
-  const hDay = L2 - Math.floor((709 * hMonth) / 24);
-  const hYear = 30 * n + j - 29;
+  // Konversi JDN ke Hijriyah (epoch dikalibrasi)
+  const l  = jdn - 1948441 + 10632;
+  const n  = Math.floor((l - 1) / 10631);
+  const l2 = l - 10631 * n + 354;
+  const j  = Math.floor((10985 - l2) / 5316) * Math.floor((50 * l2) / 17719)
+            + Math.floor(l2 / 5670) * Math.floor((43 * l2) / 15238);
+  const l3 = l2
+    - Math.floor((30 - j) / 15) * Math.floor((17719 * j) / 50)
+    - Math.floor(j / 16) * Math.floor((15238 * j) / 43)
+    + 29;
+  const hMonth = Math.floor((24 * l3) / 709);
+  const hDay   = l3 - Math.floor((709 * hMonth) / 24);
+  const hYear  = 30 * n + j - 30;  // offset -30 dikalibrasi ke kalender Indonesia
 
   return { day: hDay, month: hMonth, year: hYear };
 }
 
-function formatHijri(date) {
-  const h = toHijri(date);
+// Tanggal Hijriyah berganti saat waktu Maghrib (bukan tengah malam)
+function getHijriDate(now) {
+  // Jika sudah masuk waktu Maghrib, tanggal Hijriyah sudah +1 hari
+  const maghribTime = prayerTimes && prayerTimes.Maghrib;
+  if (maghribTime) {
+    const [mh, mm] = maghribTime.split(':').map(Number);
+    const maghribMin = mh * 60 + mm;
+    const nowMin = now.getHours() * 60 + now.getMinutes();
+    if (nowMin >= maghribMin) {
+      // Setelah Maghrib → gunakan hari besok sebagai basis Hijriyah
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      return toHijri(tomorrow);
+    }
+  }
+  return toHijri(now);
+}
+
+function formatHijri(now) {
+  const h = getHijriDate(now);
   return `${h.day} ${HIJRI_MONTHS[h.month - 1]} ${h.year} H`;
 }
 
@@ -217,17 +235,14 @@ function updateClock() {
 
   if (topbarMasehi) topbarMasehi.textContent = dateStr;
 
-  // Update Hijri only once per day
+  // Update Hijri setiap menit (bisa berubah saat Maghrib)
+  if (topbarHijri) topbarHijri.textContent = formatHijri(now);
+
+  // Reset triggered prayers at midnight
   const todayStr = now.toDateString();
   if (todayStr !== lastDateStr) {
     lastDateStr = todayStr;
-    const hijriStr = formatHijri(now);
-    if (topbarHijri) topbarHijri.textContent = hijriStr;
-    
-    // Reset triggered prayers at midnight
-    if (now.getHours() === 0 && now.getMinutes() === 0) {
-      triggedPrayers.clear();
-    }
+    triggedPrayers.clear();
   }
 
   updateCountdown(now);
@@ -237,6 +252,11 @@ function updateClock() {
 // ============================================================
 // PRAYER TIME — NEXT & COUNTDOWN
 // ============================================================
+function getDisplayName(name, now) {
+  if (name === 'Dzuhur' && now.getDay() === 5) return 'Jum\'at';
+  return name;
+}
+
 function getPrayerList() {
   return Object.entries(prayerTimes).map(([name, time]) => ({
     name, time,
@@ -275,12 +295,13 @@ function updateCountdown(now) {
   let diff = nextTotalSec - nowTotalSec;
   if (diff < 0) diff += 86400;
 
-  document.getElementById('countdown-next-prayer').textContent = `Menuju ${next.name}`;
+  const displayName = getDisplayName(next.name, now);
+  document.getElementById('countdown-next-prayer').textContent = `Menuju ${displayName}`;
   document.getElementById('countdown-timer').textContent = minutesToDisplay(diff);
   document.getElementById('countdown-status').textContent = `Pukul ${next.time} WIB`;
 
   // Next prayer info card
-  document.getElementById('npi-name').textContent = next.name;
+  document.getElementById('npi-name').textContent = displayName;
   document.getElementById('npi-time').textContent = next.time + ' WIB';
   document.getElementById('npi-icon').textContent = PRAYER_ICONS[next.name] || '🕌';
 
@@ -295,19 +316,20 @@ function renderPrayerSchedule(now) {
   const container = document.getElementById('prayer-schedule');
   container.innerHTML = '';
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
-  const next = getNextPrayer(now);
+  const current = getCurrentPrayer(now);
 
   for (const [name, time] of Object.entries(prayerTimes)) {
     const minutes = timeToMinutes(time);
     const card = document.createElement('div');
+    const displayName = getDisplayName(name, now);
     card.className = 'prayer-card';
     card.id = `prayer-card-${name}`;
 
-    if (next && name === next.name) card.classList.add('active');
+    if (current && name === current.name) card.classList.add('active');
     else if (minutes < nowMinutes) card.classList.add('passed');
 
     card.innerHTML = `
-      <div class="prayer-name">${name}</div>
+      <div class="prayer-name">${displayName}</div>
       <div class="prayer-time">${time}</div>
     `;
     container.appendChild(card);
@@ -325,7 +347,8 @@ function checkPrayerTrigger(now) {
     const minutes = timeToMinutes(time);
     const key = `${name}_${now.toDateString()}`;
 
-    if (minutes === nowMinutes && nowSec === 0 && !triggedPrayers.has(key)) {
+    // Trigger dalam window 0-59 detik pertama dari menit waktu shalat
+    if (minutes === nowMinutes && nowSec < 60 && !triggedPrayers.has(key)) {
       triggedPrayers.add(key);
       triggerAdzan(name);
       break;
@@ -337,13 +360,18 @@ function checkPrayerTrigger(now) {
 // ADZAN
 // ============================================================
 let adzanAutoDismissTimer = null;
+let currentAdzanIsTest = false;
 
-function triggerAdzan(prayerName) {
+function triggerAdzan(prayerName, isTest = false) {
   if (adzanPlaying) return;
   adzanPlaying = true;
+  currentAdzanIsTest = isTest;
+
+  const now = new Date();
+  const displayName = getDisplayName(prayerName, now);
 
   // Show overlay
-  document.getElementById('adzan-prayer-name').textContent = prayerName;
+  document.getElementById('adzan-prayer-name').textContent = displayName;
   document.getElementById('adzan-overlay').classList.add('show');
 
   // Play audio
@@ -369,6 +397,18 @@ function dismissAdzan(prayerName) {
   document.getElementById('adzan-overlay').classList.remove('show');
   adzanPlaying = false;
 
+  if (currentAdzanIsTest) {
+    currentAdzanIsTest = false;
+    return; // Langsung layar utama tanpa iqomah/khutbah
+  }
+
+  const now = new Date();
+  // Jika ini Dzuhur di hari Jumat, jalankan notif khutbah 15 menit
+  if (prayerName === 'Dzuhur' && now.getDay() === 5) {
+    startKhutbahJumat(15);
+    return;
+  }
+
   // Start iqomah countdown if enabled
   const dur = config.iqomahDurations[prayerName || ''] || 0;
   if (config.iqomahEnabled && dur > 0) {
@@ -392,18 +432,41 @@ function startIqomah(prayerName, minutes) {
   overlay.classList.add('show');
 
   // Immediately display time
-  document.getElementById('iqomah-timer-display').textContent = minutesToDisplay(iqomahSeconds);
+  document.getElementById('iqomah-timer-display').textContent = '- ' + minutesToDisplay(iqomahSeconds);
 
   if (iqomahTimer) clearInterval(iqomahTimer);
   iqomahTimer = setInterval(() => {
     iqomahSeconds--;
-    document.getElementById('iqomah-timer-display').textContent = minutesToDisplay(iqomahSeconds);
+    document.getElementById('iqomah-timer-display').textContent = '- ' + minutesToDisplay(iqomahSeconds);
 
     if (iqomahSeconds <= 0) {
       clearInterval(iqomahTimer);
       iqomahTimer = null;
       overlay.classList.remove('show');
       if (config.soundEnabled) playAudio('audio/beep.mp3');
+    }
+  }, 1000);
+}
+
+// ============================================================
+// KHUTBAH JUMAT
+// ============================================================
+let jumatTimer = null;
+let jumatSeconds = 0;
+
+function startKhutbahJumat(minutes) {
+  jumatSeconds = minutes * 60;
+  
+  const overlay = document.getElementById('jumat-overlay');
+  overlay.classList.add('show');
+  
+  if (jumatTimer) clearInterval(jumatTimer);
+  jumatTimer = setInterval(() => {
+    jumatSeconds--;
+    if (jumatSeconds <= 0) {
+      clearInterval(jumatTimer);
+      jumatTimer = null;
+      overlay.classList.remove('show');
     }
   }, 1000);
 }
@@ -426,6 +489,8 @@ const SLIDE_FILENAMES = [
   'slides/slide1.png',
   'slides/slide2.png',
   'slides/slide3.png',
+  'slides/slide4.png',
+  'slides/slide5.png',
 ];
 
 async function loadSlides() {
@@ -593,10 +658,10 @@ function openSettings() {
   document.getElementById('iq-isya').value    = d.Isya;
   document.getElementById('toggle-sound').checked   = config.soundEnabled;
   document.getElementById('toggle-iqomah').checked  = config.iqomahEnabled;
-  document.getElementById('input-spreadsheet').value = config.spreadsheetUrl || '';
   document.getElementById('input-slideshow-interval').value = config.slideshowInterval || 7;
   document.getElementById('input-nasihat').value = config.nasihatText || '';
   document.getElementById('input-nasihat-interval').value = config.nasihatInterval || 10;
+  document.getElementById('input-masjid-name').value = config.masjidName || 'Masjid Al Ikhlas Adi Sucipto';
   document.getElementById('settings-overlay').classList.add('show');
 }
 
@@ -612,13 +677,16 @@ function saveSettings() {
   config.iqomahDurations.Isya    = parseInt(document.getElementById('iq-isya').value)    || 0;
   config.soundEnabled    = document.getElementById('toggle-sound').checked;
   config.iqomahEnabled   = document.getElementById('toggle-iqomah').checked;
-  config.spreadsheetUrl  = document.getElementById('input-spreadsheet').value.trim();
   config.slideshowInterval = parseInt(document.getElementById('input-slideshow-interval').value) || 7;
   config.nasihatText     = document.getElementById('input-nasihat').value.trim();
   config.nasihatInterval = parseInt(document.getElementById('input-nasihat-interval').value) || 10;
+  config.masjidName      = document.getElementById('input-masjid-name').value.trim() || 'Masjid Al Ikhlas Adi Sucipto';
 
   saveConfig();
   closeSettings();
+
+  // Apply masjid name
+  document.getElementById('masjid-name-display').textContent = config.masjidName;
 
   // Apply nasihat immediately
   startNasihatRotation();
@@ -672,18 +740,26 @@ async function init() {
   });
   document.getElementById('btn-save-settings').addEventListener('click', saveSettings);
   document.getElementById('adzan-dismiss').addEventListener('click', () => {
-    const name = document.getElementById('adzan-prayer-name').textContent;
-    dismissAdzan(name);
+    // We need original prayer name. 'Dzuhur' stays 'Dzuhur' in memory, 
+    // but UI might say 'Jum'at'. So we'll find original name.
+    const uiName = document.getElementById('adzan-prayer-name').textContent;
+    let originalName = uiName;
+    if (uiName === "Jum'at") originalName = 'Dzuhur';
+    dismissAdzan(originalName);
   });
   
   // Test buttons
   document.getElementById('btn-test-adzan').addEventListener('click', () => {
     closeSettings();
-    triggerAdzan('Dzuhur');
+    triggerAdzan('Dzuhur', true); // isTest = true
   });
   document.getElementById('btn-test-iqomah').addEventListener('click', () => {
     closeSettings();
-    startIqomah('Dzuhur');
+    startIqomah('Dzuhur', 1); // 1 menit untuk test
+  });
+  document.getElementById('btn-test-jumat').addEventListener('click', () => {
+    closeSettings();
+    startKhutbahJumat(1); // 1 menit untuk test
   });
 
   loadConfig();
