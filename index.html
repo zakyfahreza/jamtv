@@ -132,19 +132,33 @@
   <div class="iq-title">IQOMAH</div>
   <div class="iq-name">Dzuhur</div>
   <div class="iq-text">Segera berwudhu &amp; membentuk shaf</div>
-  <div id="iqomah-timer-display" style="font-family:'Poppins',sans-serif; font-size:120px; font-weight:800; color:var(--accent-gold); margin:20px 0;">00:00</div>
+  <div id="iqomah-timer-display" style="font-family:'Poppins',sans-serif; font-size:180px; font-weight:800; color:var(--accent-gold); margin:20px 0;">00:00</div>
 </div>
 
 <!-- ================================================
      📢 JUMAT OVERLAY
 ================================================ -->
 <div id="jumat-overlay" role="dialog" aria-modal="true" aria-label="Khutbah Jumat">
-  <div class="iq-title" style="color: var(--accent);">PERHATIAN</div>
-  <div class="iq-name" style="font-size: 72px;">KHUTBAH JUM'AT</div>
-  <div class="iq-text" style="font-size: 32px; max-width: 80%; text-align: center; margin-top: 20px; line-height: 1.5; color: var(--text-primary);">
+  <div class="iq-title" style="color: var(--accent); font-weight: bold;">PERHATIAN</div>
+  <div class="iq-name" style="font-size: 72px; font-weight: bold;">KHUTBAH JUM'AT</div>
+  <div class="iq-text" style="font-size: 32px; font-weight: bold; max-width: 80%; text-align: center; margin-top: 20px; line-height: 1.5; color: var(--text-primary);">
     Harap tenang dan dengarkan Khotib.<br>
     <span style="font-size: 24px; color: var(--text-secondary); display: block; margin-top: 10px;">
       "Barangsiapa yang berbicara saat Khotib berkhutbah, maka sia-sialah shalat Jum'atnya."
+    </span>
+  </div>
+</div>
+
+<!-- ================================================
+     ☀️ DHUHA OVERLAY
+================================================ -->
+<div id="dhuha-overlay" role="dialog" aria-modal="true" aria-label="Waktu Dhuha">
+  <div class="iq-title" style="color: var(--accent-gold); font-weight: bold;">WAKTU SYURUQ TELAH USAI</div>
+  <div class="iq-name" style="font-size: 72px; font-weight: bold;">WAKTU DHUHA</div>
+  <div class="iq-text" style="font-size: 32px; font-weight: bold; max-width: 80%; text-align: center; margin-top: 20px; line-height: 1.5; color: var(--text-primary);">
+    Telah masuk waktu Dhuha.<br>
+    <span style="font-size: 24px; color: var(--text-secondary); display: block; margin-top: 10px;">
+      Dianjurkan melaksanakan shalat sunnah Dhuha.
     </span>
   </div>
 </div>
@@ -238,6 +252,7 @@
         <button id="btn-test-adzan" class="btn-save" style="flex:1; background:var(--accent); font-size: 13px;">🔊 Test Adzan</button>
         <button id="btn-test-iqomah" class="btn-save" style="flex:1; background:var(--accent-gold); color:#000; font-size: 13px;">⏱ Test Iqomah</button>
         <button id="btn-test-jumat" class="btn-save" style="flex:1; background:#4a7c59; font-size: 13px;">📢 Test Jumat</button>
+        <button id="btn-test-dhuha" class="btn-save" style="flex:1; background:#d4a843; color:#000; font-size: 13px;">☀️ Test Dhuha</button>
       </div>
     </div>
 

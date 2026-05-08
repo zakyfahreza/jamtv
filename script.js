@@ -356,7 +356,11 @@ function checkPrayerTrigger(now) {
     // Trigger dalam window 0-59 detik pertama dari menit waktu shalat
     if (minutes === nowMinutes && nowSec < 60 && !triggedPrayers.has(key)) {
       triggedPrayers.add(key);
-      triggerAdzan(name);
+      if (name === 'Terbit') {
+        startTerbitCountdown(15);
+      } else {
+        triggerAdzan(name);
+      }
       break;
     }
   }
@@ -380,9 +384,10 @@ function triggerAdzan(prayerName, isTest = false) {
   document.getElementById('adzan-prayer-name').textContent = displayName;
   document.getElementById('adzan-overlay').classList.add('show');
 
+  let adzanAudio = null;
   // Play audio
   if (config.soundEnabled) {
-    playAudio('audio/adzan.mp3', () => {
+    adzanAudio = playAudio('audio/adzan.mp3', () => {
       // fallback beep
       playAudio('audio/beep.mp3');
     });
@@ -391,11 +396,23 @@ function triggerAdzan(prayerName, isTest = false) {
   // Update prayer cards
   renderPrayerSchedule(new Date());
 
-  // Auto dismiss after 3 minutes if not dismissed manually
+  // Auto dismiss after audio ends or fallback timer
   if (adzanAutoDismissTimer) clearTimeout(adzanAutoDismissTimer);
-  adzanAutoDismissTimer = setTimeout(() => {
-    if (adzanPlaying) dismissAdzan(prayerName);
-  }, 3 * 60 * 1000);
+  
+  if (adzanAudio) {
+    adzanAudio.addEventListener('ended', () => {
+      if (adzanPlaying) dismissAdzan(prayerName);
+    });
+    // Fallback timer just in case audio gets stuck (misal 4 menit)
+    adzanAutoDismissTimer = setTimeout(() => {
+      if (adzanPlaying) dismissAdzan(prayerName);
+    }, 4 * 60 * 1000);
+  } else {
+    // Jika tanpa suara, auto dismiss setelah 30 detik
+    adzanAutoDismissTimer = setTimeout(() => {
+      if (adzanPlaying) dismissAdzan(prayerName);
+    }, 30 * 1000);
+  }
 }
 
 function dismissAdzan(prayerName) {
@@ -434,7 +451,9 @@ function startIqomah(prayerName, minutes) {
 
   // Show FULLSCREEN iqomah overlay
   const overlay = document.getElementById('iqomah-overlay');
+  overlay.querySelector('.iq-title').textContent = 'IQOMAH';
   overlay.querySelector('.iq-name').textContent = prayerName || 'Dzuhur';
+  overlay.querySelector('.iq-text').textContent = 'Segera berwudhu & membentuk shaf';
   overlay.classList.add('show');
 
   // Immediately display time
@@ -452,6 +471,57 @@ function startIqomah(prayerName, minutes) {
       if (config.soundEnabled) playAudio('audio/beep.mp3');
     }
   }, 1000);
+}
+
+// ============================================================
+// TERBIT & DHUHA
+// ============================================================
+let terbitTimer = null;
+let terbitSeconds = 0;
+let dhuhaTimer = null;
+
+function startTerbitCountdown(minutes) {
+  terbitSeconds = minutes * 60;
+  
+  const overlay = document.getElementById('iqomah-overlay');
+  overlay.querySelector('.iq-title').textContent = 'SYURUQ';
+  overlay.querySelector('.iq-name').textContent = 'Waktu Terbit';
+  overlay.querySelector('.iq-text').textContent = 'Menunggu waktu Dhuha...';
+  overlay.classList.add('show');
+
+  const display = document.getElementById('iqomah-timer-display');
+  display.textContent = '- ' + minutesToDisplay(terbitSeconds);
+
+  if (terbitTimer) clearInterval(terbitTimer);
+  terbitTimer = setInterval(() => {
+    terbitSeconds--;
+    display.textContent = '- ' + minutesToDisplay(terbitSeconds);
+
+    if (terbitSeconds <= 0) {
+      clearInterval(terbitTimer);
+      terbitTimer = null;
+      overlay.classList.remove('show');
+      
+      // Kembalikan teks asli iqomah
+      overlay.querySelector('.iq-title').textContent = 'IQOMAH';
+      overlay.querySelector('.iq-text').textContent = 'Segera berwudhu & membentuk shaf';
+      
+      showDhuhaOverlay();
+    }
+  }, 1000);
+}
+
+function showDhuhaOverlay() {
+  const overlay = document.getElementById('dhuha-overlay');
+  overlay.classList.add('show');
+  
+  if (config.soundEnabled) playAudio('audio/beep.mp3');
+  
+  // Auto dismiss after 30 seconds
+  if (dhuhaTimer) clearTimeout(dhuhaTimer);
+  dhuhaTimer = setTimeout(() => {
+    overlay.classList.remove('show');
+  }, 30000);
 }
 
 // ============================================================
@@ -766,6 +836,10 @@ async function init() {
   document.getElementById('btn-test-jumat').addEventListener('click', () => {
     closeSettings();
     startKhutbahJumat(1); // 1 menit untuk test
+  });
+  document.getElementById('btn-test-dhuha').addEventListener('click', () => {
+    closeSettings();
+    showDhuhaOverlay();
   });
 
   loadConfig();
