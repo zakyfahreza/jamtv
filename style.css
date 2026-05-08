@@ -168,14 +168,14 @@ body {
 }
 
 .topbar-date-masehi {
-  font-size: 15px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--text-primary);
   white-space: nowrap;
 }
 
 .topbar-date-hijri {
-  font-size: 14px;
+  font-size: 18px;
   color: var(--accent-gold);
   font-weight: 600;
   white-space: nowrap;
@@ -230,23 +230,23 @@ body {
 
 #clock-time {
   font-family: 'Poppins', sans-serif;
-  font-size: 124px;
+  font-size: 156px;
   font-weight: 800;
   line-height: 1;
   color: var(--text-primary);
   letter-spacing: 2px;
-  padding-right: 48px;
+  padding-right: 56px;
   /* space for seconds */
 }
 
 /* Detik — pojok kanan atas jam */
 #clock-seconds {
   font-family: 'Poppins', sans-serif;
-  font-size: 22px;
+  font-size: 28px;
   font-weight: 700;
   color: var(--accent);
   position: absolute;
-  top: 10px;
+  top: 14px;
   right: 0;
   letter-spacing: 1px;
   line-height: 1;
@@ -281,11 +281,12 @@ body {
 
 #countdown-timer {
   font-family: 'Poppins', sans-serif;
-  font-size: 34px;
+  font-size: 52px;
   font-weight: 700;
   color: var(--text-primary);
   letter-spacing: 2px;
   line-height: 1;
+  margin: 4px 0;
 }
 
 #countdown-status {
@@ -524,7 +525,7 @@ body {
 
 .prayer-time {
   font-family: 'Poppins', sans-serif;
-  font-size: 22px;
+  font-size: 36px;
   font-weight: 700;
   color: var(--text-primary);
   margin-top: 3px;

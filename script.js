@@ -210,6 +210,12 @@ function timeToMinutes(timeStr) {
   return h * 60 + m;
 }
 
+function formatHHMM(totalSeconds) {
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+}
+
 function minutesToDisplay(totalSeconds) {
   const h = Math.floor(totalSeconds / 3600);
   const m = Math.floor((totalSeconds % 3600) / 60);
@@ -297,7 +303,7 @@ function updateCountdown(now) {
 
   const displayName = getDisplayName(next.name, now);
   document.getElementById('countdown-next-prayer').textContent = `Menuju ${displayName}`;
-  document.getElementById('countdown-timer').textContent = minutesToDisplay(diff);
+  document.getElementById('countdown-timer').textContent = formatHHMM(diff);
   document.getElementById('countdown-status').textContent = `Pukul ${next.time} WIB`;
 
   // Next prayer info card
