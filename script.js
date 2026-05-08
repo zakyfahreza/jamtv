@@ -303,7 +303,7 @@ function updateCountdown(now) {
 
   const displayName = getDisplayName(next.name, now);
   document.getElementById('countdown-next-prayer').textContent = `Menuju ${displayName}`;
-  document.getElementById('countdown-timer').textContent = formatHHMM(diff);
+  document.getElementById('countdown-timer').textContent = '- ' + formatHHMM(diff);
   document.getElementById('countdown-status').textContent = `Pukul ${next.time} WIB`;
 
   // Next prayer info card
