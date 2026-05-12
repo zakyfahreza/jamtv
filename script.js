@@ -22,6 +22,7 @@ const DEFAULT_CONFIG = {
   soundEnabled: true,
   spreadsheetUrl: 'https://docs.google.com/spreadsheets/d/1SBsjwFKzSjLelgJimRdO4oiszqAv5ETjdpub_b3aZkI/edit?gid=1198090480#gid=1198090480',
   slideshowInterval: 7,  // detik
+  totalSlides: 5,        // jumlah slide gambar
   iqomahEnabled: true,
   nasihatInterval: 10,   // detik
   nasihatText: 'Mari makmurkan masjid dengan menjaga shalat berjamaah tepat waktu\n\nJangan lupa membaca Al-Qur’an setiap hari walau hanya beberapa ayat\n\nKebersihan masjid adalah tanggung jawab bersama. Mari jaga kebersihan rumah Allah\n\nPerbanyak shalawat dan dzikir agar hati menjadi tenang dan penuh keberkahan\n\nMatikan atau senyapkan ponsel saat berada di dalam masjid demi kekhusyukan ibadah',
@@ -561,17 +562,14 @@ function playAudio(src, onError) {
 // ============================================================
 // SLIDESHOW
 // ============================================================
-const SLIDE_FILENAMES = [
-  'slides/slide1.png',
-  'slides/slide2.png',
-  'slides/slide3.png',
-  'slides/slide4.png',
-  'slides/slide5.png',
-];
 
 async function loadSlides() {
   const container = document.getElementById('slideshow');
-  slides = [...SLIDE_FILENAMES];
+  const total = config.totalSlides || 5;
+  slides = [];
+  for (let i = 1; i <= total; i++) {
+    slides.push(`slides/slide${i}.png`);
+  }
 
   // Optional: We skip the strict Image onload check because on local file:// 
   // protocol it might fail due to CORS or local file restrictions.
@@ -734,6 +732,7 @@ function openSettings() {
   document.getElementById('iq-isya').value    = d.Isya;
   document.getElementById('toggle-sound').checked   = config.soundEnabled;
   document.getElementById('toggle-iqomah').checked  = config.iqomahEnabled;
+  document.getElementById('input-total-slides').value = config.totalSlides || 5;
   document.getElementById('input-slideshow-interval').value = config.slideshowInterval || 7;
   document.getElementById('input-nasihat').value = config.nasihatText || '';
   document.getElementById('input-nasihat-interval').value = config.nasihatInterval || 10;
@@ -753,6 +752,7 @@ function saveSettings() {
   config.iqomahDurations.Isya    = parseInt(document.getElementById('iq-isya').value)    || 0;
   config.soundEnabled    = document.getElementById('toggle-sound').checked;
   config.iqomahEnabled   = document.getElementById('toggle-iqomah').checked;
+  config.totalSlides     = parseInt(document.getElementById('input-total-slides').value) || 5;
   config.slideshowInterval = parseInt(document.getElementById('input-slideshow-interval').value) || 7;
   config.nasihatText     = document.getElementById('input-nasihat').value.trim();
   config.nasihatInterval = parseInt(document.getElementById('input-nasihat-interval').value) || 10;
@@ -770,8 +770,8 @@ function saveSettings() {
   // Re-fetch finance if URL changed
   fetchFinanceData();
 
-  // Restart slideshow with new interval
-  startSlideshow();
+  // Restart slideshow with new config
+  loadSlides();
 
   showToast('Pengaturan tersimpan!');
 }
