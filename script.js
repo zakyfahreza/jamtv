@@ -11,7 +11,6 @@
 
 const DEFAULT_CONFIG = {
   iqomahDurations: {
-    Imsak: 0,    // tidak ada iqomah
     Subuh: 7,
     Terbit: 0,
     Dzuhur: 10,
@@ -32,7 +31,6 @@ const DEFAULT_CONFIG = {
 // Jadwal shalat static fallback untuk Kota Solo (WIB)
 // Ini adalah rata-rata tahunan; idealnya diganti API real-time
 const STATIC_PRAYER_TIMES = {
-  Imsak:   '04:27',
   Subuh:   '04:37',
   Terbit:  '05:55',
   Dzuhur:  '11:48',
@@ -42,7 +40,6 @@ const STATIC_PRAYER_TIMES = {
 };
 
 const PRAYER_ICONS = {
-  Imsak:   '🌑',
   Subuh:   '🌙',
   Terbit:  '🌅',
   Dzuhur:  '☀️',
@@ -647,7 +644,6 @@ async function fetchPrayerTimes() {
     
     const t = data.data.jadwal;
     prayerTimes = {
-      Imsak:   t.imsak,
       Subuh:   t.subuh,
       Terbit:  t.terbit,
       Dzuhur:  t.dzuhur,

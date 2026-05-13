@@ -480,8 +480,8 @@ body {
 
 #prayer-schedule {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
   flex: 1;
 }
 
@@ -518,10 +518,10 @@ body {
 }
 
 .prayer-name {
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--text-secondary);
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
   text-transform: uppercase;
 }
 
@@ -531,10 +531,10 @@ body {
 
 .prayer-time {
   font-family: 'Poppins', sans-serif;
-  font-size: 36px;
-  font-weight: 700;
+  font-size: 46px;
+  font-weight: 800;
   color: var(--text-primary);
-  margin-top: 3px;
+  margin-top: 6px;
 }
 
 .prayer-card.active .prayer-time {
