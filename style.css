@@ -94,15 +94,14 @@ body {
 }
 
 #top-bar .masjid-label {
-  font-size: 20px;
+  font-size: 15px;
   font-weight: 800;
-  color: var(--accent);
+  color: #ffffff;
   letter-spacing: 0.8px;
   text-transform: uppercase;
   white-space: nowrap;
   flex-shrink: 0;
   padding-left: 0;
-  /* reset — no longer needed */
 }
 
 #top-bar .finance-ticker {

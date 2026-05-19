@@ -181,7 +181,13 @@ function getHijriDate(now) {
 
 function formatHijri(now) {
   const h = getHijriDate(now);
-  return `${h.day} ${HIJRI_MONTHS[h.month - 1]} ${h.year} H`;
+  // Offset +1 hari untuk kalibrasi lokal
+  let day   = h.day + 1;
+  let month = h.month;
+  let year  = h.year;
+  if (day > 30) { day = 1; month++; }
+  if (month > 12) { month = 1; year++; }
+  return `${day} ${HIJRI_MONTHS[month - 1]} ${year} H`;
 }
 
 // ============================================================
