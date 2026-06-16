@@ -27,15 +27,17 @@ jamtv/
 
 | Fitur | Keterangan |
 |---|---|
+| ⛶ Layar Penuh | Tombol khusus untuk masuk ke mode *full screen* |
 | 🕐 Jam Digital | Format HH:mm + detik, real-time |
 | 📅 Tanggal | Masehi (Bahasa Indonesia) + Hijriyah (Akurat Tabular Islamic) |
 | 🕌 Jadwal Shalat | Dari API Kemenag via myquran.com (Solo/WIB), fallback static |
 | ⏳ Countdown | Hitung mundur ke waktu shalat berikutnya |
 | 🔔 Notifikasi Adzan | Overlay + audio adzan.mp3 |
-| ⏱ Countdown Iqomah | Bisa diatur per waktu shalat |
-| 📢 Khutbah Jum'at | Notifikasi otomatis selama 15 menit khusus hari Jum'at |
-| 🖼️ Slideshow | Auto-loop 5 gambar dari folder /slides |
-| ⚙️ Pengaturan | Modal UI, identitas nama masjid, tes notifikasi, tersimpan di localStorage |
+| ⏱ Countdown Iqomah | Bisa diatur per waktu shalat (ditutup dengan tulisan WAKTU IQOMAH) |
+| 🌅 Waktu Dhuha | Hitung mundur otomatis dari waktu Syuruq ke masuknya waktu Dhuha |
+| 📢 Khutbah Jum'at | Notifikasi otomatis selama Khutbah pada hari Jum'at (durasi dapat diatur) |
+| 🖼️ Slideshow | Auto-loop gambar dari folder /slides |
+| ⚙️ Pengaturan | Modal UI, identitas, durasi dinamis, tersimpan di localStorage |
 
 ---
 
@@ -78,8 +80,9 @@ Buka dengan klik tombol **⚙️** di pojok kiri atas:
 - **Identitas Masjid** — Ganti nama masjid pada header utama
 - **Nasihat & Info** — Ganti teks berjalan/berputar pada info board
 - **Durasi Iqomah** — Atur per waktu shalat (dalam menit)
+- **Durasi Tambahan** — Atur rentang waktu Syuruq ke Dhuha dan durasi peringatan Khutbah Jum'at
 - **Toggle Suara & Iqomah** — Aktif/nonaktifkan audio dan fungsi countdown iqomah
-- **Test Buttons** — Tombol simulasi untuk *Test Adzan*, *Test Iqomah*, dan *Test Jumat*
+- **Test Buttons** — Tombol simulasi untuk *Test Adzan*, *Test Iqomah*, *Test Jumat*, dan *Test Dhuha*
 - **Interval Slideshow** — Ganti durasi tiap slide (detik)
 
 Semua pengaturan disimpan otomatis ke `localStorage`.

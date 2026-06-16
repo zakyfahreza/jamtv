@@ -19,6 +19,7 @@
   <!-- Kiri: Tombol Pengaturan + Nama Masjid -->
   <div class="topbar-left">
     <button id="btn-settings" title="Pengaturan" aria-label="Buka Pengaturan">⚙️</button>
+    <button id="btn-fullscreen" title="Layar Penuh" aria-label="Layar Penuh" style="margin-left: 8px; background: transparent; border: none; color: #fff; font-size: 18px; cursor: pointer;">⛶</button>
     <span id="masjid-name-display" class="masjid-label">Masjid Al Ikhlas Adi Sucipto, Jajar</span>
   </div>
 
@@ -218,6 +219,19 @@
       <div class="form-row">
         <label class="form-label" for="iq-isya">🌙 Isya</label>
         <input type="number" id="iq-isya" class="form-input" min="0" max="30" value="10" />
+      </div>
+    </div>
+
+    <!-- Durasi Tambahan -->
+    <div class="modal-section">
+      <div class="modal-section-title">⏱ Durasi Tambahan (menit)</div>
+      <div class="form-row">
+        <label class="form-label" for="dur-syuruq">🌅 Syuruq ke Dhuha</label>
+        <input type="number" id="dur-syuruq" class="form-input" min="0" max="60" value="15" />
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="dur-jumat">📢 Khutbah Jum'at</label>
+        <input type="number" id="dur-jumat" class="form-input" min="0" max="60" value="15" />
       </div>
     </div>
 

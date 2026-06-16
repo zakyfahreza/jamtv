@@ -25,7 +25,9 @@ const DEFAULT_CONFIG = {
   iqomahEnabled: true,
   nasihatInterval: 10,   // detik
   nasihatText: 'Mari makmurkan masjid dengan menjaga shalat berjamaah tepat waktu\n\nJangan lupa membaca Al-Qur’an setiap hari walau hanya beberapa ayat\n\nKebersihan masjid adalah tanggung jawab bersama. Mari jaga kebersihan rumah Allah\n\nPerbanyak shalawat dan dzikir agar hati menjadi tenang dan penuh keberkahan\n\nMatikan atau senyapkan ponsel saat berada di dalam masjid demi kekhusyukan ibadah',
-  masjidName: 'Masjid Al Ikhlas Adi Sucipto, Jajar'
+  masjidName: 'Masjid Al Ikhlas Adi Sucipto, Jajar',
+  durasiSyuruq: 15,
+  durasiJumat: 15
 };
 
 // Jadwal shalat static fallback untuk Kota Solo (WIB)
@@ -361,7 +363,7 @@ function checkPrayerTrigger(now) {
     if (minutes === nowMinutes && nowSec < 60 && !triggedPrayers.has(key)) {
       triggedPrayers.add(key);
       if (name === 'Terbit') {
-        startTerbitCountdown(15);
+        startTerbitCountdown(config.durasiSyuruq || 15);
       } else {
         triggerAdzan(name);
       }
@@ -432,7 +434,7 @@ function dismissAdzan(prayerName) {
   const now = new Date();
   // Jika ini Dzuhur di hari Jumat, jalankan notif khutbah 15 menit
   if (prayerName === 'Dzuhur' && now.getDay() === 5) {
-    startKhutbahJumat(15);
+    startKhutbahJumat(config.durasiJumat || 15);
     return;
   }
 
@@ -471,8 +473,13 @@ function startIqomah(prayerName, minutes) {
     if (iqomahSeconds <= 0) {
       clearInterval(iqomahTimer);
       iqomahTimer = null;
-      overlay.classList.remove('show');
+      
+      document.getElementById('iqomah-timer-display').textContent = 'WAKTU IQOMAH';
       if (config.soundEnabled) playAudio('audio/beep.mp3');
+      
+      setTimeout(() => {
+        overlay.classList.remove('show');
+      }, 10000);
     }
   }, 1000);
 }
@@ -739,6 +746,8 @@ function openSettings() {
   document.getElementById('input-nasihat').value = config.nasihatText || '';
   document.getElementById('input-nasihat-interval').value = config.nasihatInterval || 10;
   document.getElementById('input-masjid-name').value = config.masjidName || 'Masjid Al Ikhlas Adi Sucipto, Jajar';
+  document.getElementById('dur-syuruq').value = config.durasiSyuruq || 15;
+  document.getElementById('dur-jumat').value = config.durasiJumat || 15;
   document.getElementById('settings-overlay').classList.add('show');
 }
 
@@ -759,6 +768,8 @@ function saveSettings() {
   config.nasihatText     = document.getElementById('input-nasihat').value.trim();
   config.nasihatInterval = parseInt(document.getElementById('input-nasihat-interval').value) || 10;
   config.masjidName      = document.getElementById('input-masjid-name').value.trim() || 'Masjid Al Ikhlas Adi Sucipto, Jajar';
+  config.durasiSyuruq    = parseInt(document.getElementById('dur-syuruq').value) || 15;
+  config.durasiJumat     = parseInt(document.getElementById('dur-jumat').value) || 15;
 
   saveConfig();
   closeSettings();
@@ -812,6 +823,17 @@ function scheduleFinanceRefresh() {
 async function init() {
   // Attach event listeners first so UI is responsive immediately
   document.getElementById('btn-settings').addEventListener('click', openSettings);
+  document.getElementById('btn-fullscreen').addEventListener('click', () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(err => {
+        console.warn(`Error attempting to enable fullscreen: ${err.message}`);
+      });
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+  });
   document.getElementById('modal-close').addEventListener('click', closeSettings);
   document.getElementById('settings-overlay').addEventListener('click', (e) => {
     if (e.target === document.getElementById('settings-overlay')) closeSettings();
