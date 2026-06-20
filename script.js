@@ -455,11 +455,15 @@ function startIqomah(prayerName, minutes) {
   
   iqomahSeconds = minutes * 60;
 
+  // Tampilkan kontainer hitung mundur, sembunyikan pengumuman iqomah
+  document.getElementById('iqomah-countdown-container').style.display = 'flex';
+  document.getElementById('iqomah-ready-container').style.display = 'none';
+
   // Show FULLSCREEN iqomah overlay
   const overlay = document.getElementById('iqomah-overlay');
-  overlay.querySelector('.iq-title').textContent = 'IQOMAH';
-  overlay.querySelector('.iq-name').textContent = prayerName || 'Dzuhur';
-  overlay.querySelector('.iq-text').textContent = 'Segera berwudhu & membentuk shaf';
+  overlay.querySelector('#iqomah-countdown-container .iq-title').textContent = 'IQOMAH';
+  overlay.querySelector('#iqomah-countdown-container .iq-name').textContent = prayerName || 'Dzuhur';
+  overlay.querySelector('#iqomah-countdown-container .iq-text').textContent = 'Segera berwudhu & membentuk shaf';
   overlay.classList.add('show');
 
   // Immediately display time
@@ -474,11 +478,17 @@ function startIqomah(prayerName, minutes) {
       clearInterval(iqomahTimer);
       iqomahTimer = null;
       
-      document.getElementById('iqomah-timer-display').textContent = 'WAKTU IQOMAH';
+      // Sembunyikan hitung mundur, tampilkan pengumuman iqomah
+      document.getElementById('iqomah-countdown-container').style.display = 'none';
+      document.getElementById('iqomah-ready-container').style.display = 'flex';
+      
       if (config.soundEnabled) playAudio('audio/beep.mp3');
       
       setTimeout(() => {
         overlay.classList.remove('show');
+        // Kembalikan visibilitas untuk penggunaan berikutnya
+        document.getElementById('iqomah-countdown-container').style.display = 'flex';
+        document.getElementById('iqomah-ready-container').style.display = 'none';
       }, 10000);
     }
   }, 1000);
@@ -494,10 +504,14 @@ let dhuhaTimer = null;
 function startTerbitCountdown(minutes) {
   terbitSeconds = minutes * 60;
   
+  // Pastikan kontainer hitung mundur yang aktif
+  document.getElementById('iqomah-countdown-container').style.display = 'flex';
+  document.getElementById('iqomah-ready-container').style.display = 'none';
+
   const overlay = document.getElementById('iqomah-overlay');
-  overlay.querySelector('.iq-title').textContent = 'SYURUQ';
-  overlay.querySelector('.iq-name').textContent = 'Waktu Terbit';
-  overlay.querySelector('.iq-text').textContent = 'Menunggu waktu Dhuha...';
+  overlay.querySelector('#iqomah-countdown-container .iq-title').textContent = 'SYURUQ';
+  overlay.querySelector('#iqomah-countdown-container .iq-name').textContent = 'Waktu Terbit';
+  overlay.querySelector('#iqomah-countdown-container .iq-text').textContent = 'Menunggu waktu Dhuha...';
   overlay.classList.add('show');
 
   const display = document.getElementById('iqomah-timer-display');
@@ -514,8 +528,8 @@ function startTerbitCountdown(minutes) {
       overlay.classList.remove('show');
       
       // Kembalikan teks asli iqomah
-      overlay.querySelector('.iq-title').textContent = 'IQOMAH';
-      overlay.querySelector('.iq-text').textContent = 'Segera berwudhu & membentuk shaf';
+      overlay.querySelector('#iqomah-countdown-container .iq-title').textContent = 'IQOMAH';
+      overlay.querySelector('#iqomah-countdown-container .iq-text').textContent = 'Segera berwudhu & membentuk shaf';
       
       showDhuhaOverlay();
     }

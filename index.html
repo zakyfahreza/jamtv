@@ -130,10 +130,23 @@
      ⏱ IQOMAH OVERLAY
 ================================================ -->
 <div id="iqomah-overlay" role="dialog" aria-modal="true" aria-label="Iqomah">
-  <div class="iq-title">IQOMAH</div>
-  <div class="iq-name">Dzuhur</div>
-  <div class="iq-text">Segera berwudhu &amp; membentuk shaf</div>
-  <div id="iqomah-timer-display" style="font-family:'Poppins',sans-serif; font-size:180px; font-weight:800; color:var(--accent-gold); margin:20px 0;">00:00</div>
+  <div id="iqomah-countdown-container" style="display: flex; flex-direction: column; align-items: center;">
+    <div class="iq-title">IQOMAH</div>
+    <div class="iq-name">Dzuhur</div>
+    <div class="iq-text">Segera berwudhu &amp; membentuk shaf</div>
+    <div id="iqomah-timer-display" style="font-family:'Poppins',sans-serif; font-size:180px; font-weight:800; color:var(--accent-gold); margin:20px 0;">00:00</div>
+  </div>
+
+  <div id="iqomah-ready-container" style="display: none; flex-direction: column; align-items: center; gap: 16px; animation: fadeIn 0.5s ease;">
+    <div class="iq-title" style="color: var(--accent); font-weight: bold;">PERHATIAN</div>
+    <div class="iq-name" style="font-size: 72px; font-weight: bold; color: #ffffff; text-shadow: 0 0 40px rgba(255,255,255,0.2);">WAKTU IQOMAH</div>
+    <div class="iq-text" style="font-size: 32px; font-weight: bold; max-width: 80%; text-align: center; margin-top: 20px; line-height: 1.5; color: var(--text-primary);">
+      Luruskan dan rapatkan shaf kalian.<br>
+      <span style="font-size: 24px; color: var(--accent-gold); display: block; margin-top: 10px; font-style: italic;">
+        "Karena lurus dan rapatnya shaf termasuk kesempurnaan shalat."
+      </span>
+    </div>
+  </div>
 </div>
 
 <!-- ================================================
