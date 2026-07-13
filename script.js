@@ -23,11 +23,31 @@ const DEFAULT_CONFIG = {
   slideshowInterval: 7,  // detik
   totalSlides: 5,        // jumlah slide gambar
   iqomahEnabled: true,
-  nasihatInterval: 10,   // detik
-  nasihatText: 'Mari makmurkan masjid dengan menjaga shalat berjamaah tepat waktu\n\nJangan lupa membaca Al-Qur’an setiap hari walau hanya beberapa ayat\n\nKebersihan masjid adalah tanggung jawab bersama. Mari jaga kebersihan rumah Allah\n\nPerbanyak shalawat dan dzikir agar hati menjadi tenang dan penuh keberkahan\n\nMatikan atau senyapkan ponsel saat berada di dalam masjid demi kekhusyukan ibadah',
+  kajianInterval: 8,   // detik, jeda ganti kajian
+  // Format tiap baris: Jadwal | Judul Kajian | Ustadz  (pisahkan dengan tanda |)
+  kajianText: `Selasa Pekan 1 & 3 Ba'da Maghrib–Isya' | Kitab Ad-Durar An-Nafisah | Ustadz Muhammad Alif, Lc., M.Pd.
+Selasa Pekan 2 & 4 Ba'da Maghrib–Isya' | Kitab Mandzhumah Ha'iyah | Ustadz Adi Abdul Jabbar
+Rabu Ba'da Maghrib–Isya' | Kitab Bahjatul Qulubil Abrar | Ustadz Abu Riza Ridwan, Lc., M.H.
+Kamis Ba'da Maghrib–Isya' | Syarah Aqidah Ahlus Sunnah wal Jama'ah | Ustadz Abu Ubaid Rizqi, Lc., M.Pd.
+Ahad Pekan 1, 3 & 4 Ba'da Maghrib–Isya' | Kitab Al-Wajiz | Ustadz Hamzah Al-Fajri, S.Pd.
+Ahad Pekan 1 & 4 Pukul 09.00–10.00 | Kitab Bekal Berhijrah (Ar-Risalah At-Tabukiyah) | Ustadzah Syaima Ummu Qonita
+Ahad Pekan 2 Ba'da Maghrib–Selesai | Kajian Tematik Spesial | Ustadz Ahmas Faiz Asifuddin, Lc., M.A.
+Ahad Pekan 3 Pukul 09.00–10.30 | Kitab Para Shahabiyat Nabi | Ustadzah Fitriyah Ummu Haitsam`,
   masjidName: 'Masjid Al Ikhlas Adi Sucipto, Jajar',
   durasiSyuruq: 15,
-  durasiJumat: 15
+  durasiJumat: 15,
+  autoRefreshEnabled: true,
+  autoRefreshTime: '00:00',   // Jam auto-refresh harian (format HH:MM)
+  marqueeText: `Ahlan wa Sahlan, Selamat Datang di Masjid Al-Ikhlas Adi Sucipto.
+Semoga Allah menerima amal ibadah kita. Mari makmurkan masjid dengan shalat berjamaah dan menghadiri majelis ilmu.
+Mohon mengaktifkan mode senyap pada telepon genggam.
+Jagalah ketenangan dan kekhusyukan selama berada di dalam masjid.
+Mari bersama menjaga kebersihan dan kerapian masjid.
+Luruskan dan rapatkan shaf, karena termasuk kesempurnaan shalat berjamaah.
+Setelah adzan berkumandang, segera bersiap menuju shaf terdepan.
+Salurkan infak terbaik Anda melalui kotak infak atau QRIS yang tersedia.
+"Sesungguhnya shalat adalah kewajiban yang telah ditentukan waktunya bagi orang-orang yang beriman." (QS. An-Nisa: 103)`,
+  marqueeInterval: 8
 };
 
 // Jadwal shalat static fallback untuk Kota Solo (WIB)
@@ -89,33 +109,159 @@ function loadConfig() {
 
   // Update UI with config
   document.getElementById('masjid-name-display').textContent = config.masjidName || 'Masjid Al Ikhlas Adi Sucipto, Jajar';
-  startNasihatRotation();
+  startKajianRotation();
+  startMarquee();
 }
 
-let currentNasihatIndex = 0;
-let nasihatTimer = null;
+// ============================================================
+// MARQUEE PENGUMUMAN (scroll vertikal ke atas per baris)
+// ============================================================
+let marqueeLines = [];
+let marqueeIndex = 0;
+let marqueeTimer = null;
 
-function startNasihatRotation() {
-  if (nasihatTimer) clearInterval(nasihatTimer);
-  const textRaw = config.nasihatText || '';
-  const lines = textRaw.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-  
-  const el = document.getElementById('nasihat-text');
-  if (!el) return;
+function makeMarqueeLine(text) {
+  const div = document.createElement('div');
+  div.className = 'marquee-line';
+  div.textContent = text;
+  return div;
+}
 
-  if (lines.length === 0) {
-    el.textContent = '';
+// Kecilkan font HANYA jika teks melebihi lebar area (agar tetap 1 baris)
+function fitMarqueeLine(el) {
+  const viewport = document.getElementById('marquee-viewport');
+  if (!viewport || !el) return;
+  el.style.fontSize = '';           // reset ke ukuran besar dari CSS
+  const avail = viewport.clientWidth;
+  const natural = el.scrollWidth;
+  if (avail > 0 && natural > avail) {
+    const base = parseFloat(getComputedStyle(el).fontSize) || 24;
+    const scaled = Math.max(11, Math.floor(base * (avail / natural)) - 1);
+    el.style.fontSize = scaled + 'px';
+  }
+}
+
+function startMarquee() {
+  const bar = document.getElementById('marquee-bar');
+  const viewport = document.getElementById('marquee-viewport');
+  const track = document.getElementById('marquee-track');
+  if (!bar || !viewport || !track) return;
+
+  if (marqueeTimer) { clearInterval(marqueeTimer); marqueeTimer = null; }
+
+  const raw = config.marqueeText || '';
+  marqueeLines = raw.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+
+  // Reset track
+  track.style.transition = 'none';
+  track.style.transform = 'translateY(0)';
+  track.innerHTML = '';
+
+  if (marqueeLines.length === 0) {
+    bar.style.display = 'none';
     return;
   }
-  
-  el.textContent = lines[0];
-  currentNasihatIndex = 0;
-  
-  if (lines.length > 1) {
-    nasihatTimer = setInterval(() => {
-      currentNasihatIndex = (currentNasihatIndex + 1) % lines.length;
-      el.textContent = lines[currentNasihatIndex];
-    }, (config.nasihatInterval || 10) * 1000);
+  bar.style.display = 'flex';
+
+  marqueeIndex = 0;
+  // Baris saat ini + baris berikutnya (untuk efek scroll)
+  const first = makeMarqueeLine(marqueeLines[0]);
+  const second = makeMarqueeLine(marqueeLines[1 % marqueeLines.length]);
+  track.appendChild(first);
+  track.appendChild(second);
+  fitMarqueeLine(first);
+  fitMarqueeLine(second);
+
+  // Satu baris saja: tidak perlu rotasi
+  if (marqueeLines.length === 1) return;
+
+  const interval = Math.max(3, config.marqueeInterval || 6) * 1000;
+  marqueeTimer = setInterval(advanceMarquee, interval);
+}
+
+function advanceMarquee() {
+  const viewport = document.getElementById('marquee-viewport');
+  const track = document.getElementById('marquee-track');
+  if (!viewport || !track) return;
+
+  const lineH = viewport.clientHeight; // tinggi satu baris
+  track.style.transition = 'transform 0.6s cubic-bezier(.4,0,.2,1)';
+  track.style.transform = `translateY(-${lineH}px)`;
+
+  track.addEventListener('transitionend', () => {
+    // Setelah scroll selesai: buang baris teratas, reset posisi, siapkan baris berikutnya
+    track.style.transition = 'none';
+    track.style.transform = 'translateY(0)';
+    if (track.firstChild) track.removeChild(track.firstChild);
+
+    marqueeIndex = (marqueeIndex + 1) % marqueeLines.length;
+    const nextIdx = (marqueeIndex + 1) % marqueeLines.length;
+    const newLine = makeMarqueeLine(marqueeLines[nextIdx]);
+    track.appendChild(newLine);
+    fitMarqueeLine(newLine);
+  }, { once: true });
+}
+
+let kajianList = [];
+let currentKajianIndex = 0;
+let kajianTimer = null;
+
+function parseKajianLine(line) {
+  // Format: Jadwal | Judul | Ustadz  (bagian mana pun boleh kosong)
+  const parts = line.split('|').map(p => p.trim());
+  if (parts.length === 1) {
+    // Tanpa pemisah: anggap sebagai judul saja
+    return { schedule: '', topic: parts[0], ustadz: '' };
+  }
+  return {
+    schedule: parts[0] || '',
+    topic: parts[1] || '',
+    ustadz: parts[2] || ''
+  };
+}
+
+function renderKajian(item) {
+  const schEl = document.getElementById('kajian-schedule');
+  const topEl = document.getElementById('kajian-topic');
+  const ustEl = document.getElementById('kajian-ustadz');
+  if (!schEl || !topEl || !ustEl) return;
+  schEl.textContent = item.schedule || '';
+  schEl.style.display = item.schedule ? '' : 'none';
+  topEl.textContent = item.topic || '';
+  ustEl.textContent = item.ustadz || '';
+}
+
+function startKajianRotation() {
+  if (kajianTimer) clearInterval(kajianTimer);
+
+  const raw = config.kajianText || '';
+  kajianList = raw.split('\n')
+    .map(l => l.trim())
+    .filter(l => l.length > 0)
+    .map(parseKajianLine);
+
+  const content = document.getElementById('kajian-content');
+  if (!content) return;
+
+  if (kajianList.length === 0) {
+    renderKajian({ schedule: '', topic: 'Belum ada jadwal kajian', ustadz: '' });
+    return;
+  }
+
+  currentKajianIndex = 0;
+  renderKajian(kajianList[0]);
+
+  if (kajianList.length > 1) {
+    const interval = Math.max(3, config.kajianInterval || 8) * 1000;
+    kajianTimer = setInterval(() => {
+      // Fade out, ganti, fade in
+      content.classList.add('fade');
+      setTimeout(() => {
+        currentKajianIndex = (currentKajianIndex + 1) % kajianList.length;
+        renderKajian(kajianList[currentKajianIndex]);
+        content.classList.remove('fade');
+      }, 500);
+    }, interval);
   }
 }
 
@@ -734,8 +880,11 @@ function displayFinance(income, expense, balance) {
   document.getElementById('fin-expense').textContent = formatRupiah(expense);
   document.getElementById('fin-balance').textContent = formatRupiah(balance);
   const now = new Date();
-  document.getElementById('fin-period').textContent =
-    now.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+  const finPeriod = document.getElementById('fin-period');
+  if (finPeriod) {
+    finPeriod.textContent =
+      now.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+  }
 }
 
 function showFinanceDemo() {
@@ -757,11 +906,15 @@ function openSettings() {
   document.getElementById('toggle-iqomah').checked  = config.iqomahEnabled;
   document.getElementById('input-total-slides').value = config.totalSlides || 5;
   document.getElementById('input-slideshow-interval').value = config.slideshowInterval || 7;
-  document.getElementById('input-nasihat').value = config.nasihatText || '';
-  document.getElementById('input-nasihat-interval').value = config.nasihatInterval || 10;
+  document.getElementById('input-kajian').value = config.kajianText || '';
+  document.getElementById('input-kajian-interval').value = config.kajianInterval || 8;
   document.getElementById('input-masjid-name').value = config.masjidName || 'Masjid Al Ikhlas Adi Sucipto, Jajar';
   document.getElementById('dur-syuruq').value = config.durasiSyuruq || 15;
   document.getElementById('dur-jumat').value = config.durasiJumat || 15;
+  document.getElementById('input-marquee').value = config.marqueeText || '';
+  document.getElementById('input-marquee-interval').value = config.marqueeInterval || 6;
+  document.getElementById('toggle-auto-refresh').checked = config.autoRefreshEnabled !== false;
+  document.getElementById('input-auto-refresh-time').value = config.autoRefreshTime || '00:00';
   document.getElementById('settings-overlay').classList.add('show');
 }
 
@@ -779,11 +932,15 @@ function saveSettings() {
   config.iqomahEnabled   = document.getElementById('toggle-iqomah').checked;
   config.totalSlides     = parseInt(document.getElementById('input-total-slides').value) || 5;
   config.slideshowInterval = parseInt(document.getElementById('input-slideshow-interval').value) || 7;
-  config.nasihatText     = document.getElementById('input-nasihat').value.trim();
-  config.nasihatInterval = parseInt(document.getElementById('input-nasihat-interval').value) || 10;
+  config.kajianText      = document.getElementById('input-kajian').value.trim();
+  config.kajianInterval  = parseInt(document.getElementById('input-kajian-interval').value) || 8;
   config.masjidName      = document.getElementById('input-masjid-name').value.trim() || 'Masjid Al Ikhlas Adi Sucipto, Jajar';
   config.durasiSyuruq    = parseInt(document.getElementById('dur-syuruq').value) || 15;
   config.durasiJumat     = parseInt(document.getElementById('dur-jumat').value) || 15;
+  config.marqueeText     = document.getElementById('input-marquee').value.trim();
+  config.marqueeInterval = parseInt(document.getElementById('input-marquee-interval').value) || 6;
+  config.autoRefreshEnabled = document.getElementById('toggle-auto-refresh').checked;
+  config.autoRefreshTime = document.getElementById('input-auto-refresh-time').value || '00:00';
 
   saveConfig();
   closeSettings();
@@ -791,14 +948,20 @@ function saveSettings() {
   // Apply masjid name
   document.getElementById('masjid-name-display').textContent = config.masjidName;
 
-  // Apply nasihat immediately
-  startNasihatRotation();
+  // Apply kajian schedule immediately
+  startKajianRotation();
+
+  // Apply marquee immediately
+  startMarquee();
 
   // Re-fetch finance if URL changed
   fetchFinanceData();
 
   // Restart slideshow with new config
   loadSlides();
+
+  // Re-schedule auto refresh with new time/toggle
+  scheduleAutoReload();
 
   showToast('Pengaturan tersimpan!');
 }
@@ -829,6 +992,32 @@ function scheduleDailyRefresh() {
 // Refresh finance data every hour
 function scheduleFinanceRefresh() {
   setInterval(fetchFinanceData, 60 * 60 * 1000);
+}
+
+// ============================================================
+// AUTO REFRESH (reload halaman otomatis pada jam tertentu)
+// ============================================================
+let autoReloadTimer = null;
+
+function scheduleAutoReload() {
+  if (autoReloadTimer) { clearTimeout(autoReloadTimer); autoReloadTimer = null; }
+  if (!config.autoRefreshEnabled) return;
+
+  const timeStr = config.autoRefreshTime || '00:00';
+  const [hh, mm] = timeStr.split(':').map(Number);
+  const now = new Date();
+  const next = new Date(
+    now.getFullYear(), now.getMonth(), now.getDate(),
+    hh || 0, mm || 0, 0, 0
+  );
+  // Jika waktunya sudah lewat hari ini, jadwalkan untuk besok
+  if (next <= now) next.setDate(next.getDate() + 1);
+
+  const ms = next - now;
+  console.log(`🔄 Auto-refresh dijadwalkan pada ${timeStr} (dalam ${Math.round(ms / 60000)} menit)`);
+  autoReloadTimer = setTimeout(() => {
+    location.reload();
+  }, ms);
 }
 
 // ============================================================
@@ -880,6 +1069,15 @@ async function init() {
     showDhuhaOverlay();
   });
 
+  // Hitung ulang ukuran marquee saat layar berubah (mis. masuk/keluar fullscreen)
+  let marqueeResizeTimer = null;
+  const refitMarquee = () => {
+    clearTimeout(marqueeResizeTimer);
+    marqueeResizeTimer = setTimeout(startMarquee, 300);
+  };
+  window.addEventListener('resize', refitMarquee);
+  document.addEventListener('fullscreenchange', refitMarquee);
+
   loadConfig();
 
   // Clock
@@ -896,6 +1094,9 @@ async function init() {
   // Finance
   await fetchFinanceData();
   scheduleFinanceRefresh();
+
+  // Auto refresh harian
+  scheduleAutoReload();
 
   console.log('✅ Jam Digital Masjid initialized');
 }

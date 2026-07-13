@@ -28,16 +28,32 @@ jamtv/
 | Fitur | Keterangan |
 |---|---|
 | ⛶ Layar Penuh | Tombol khusus untuk masuk ke mode *full screen* |
-| 🕐 Jam Digital | Format HH:mm + detik, real-time |
-| 📅 Tanggal | Masehi (Bahasa Indonesia) + Hijriyah (Akurat Tabular Islamic) |
-| 🕌 Jadwal Shalat | Dari API Kemenag via myquran.com (Solo/WIB), fallback static |
+| � Layout Fluid | Tata letak & ukuran font otomatis menyesuaikan layar (`clamp` + `min(vw, vh)`), anti-terpotong saat fullscreen di TV berbagai resolusi |
+| �🕐 Jam Digital | Format HH:mm + detik, real-time |
+| 📅 Tanggal | Masehi (Bahasa Indonesia) + Hijriyah, tampil satu baris dipisah `|` |
+| 🕌 Jadwal Shalat | Dari API Kemenag via myquran.com (Solo/WIB), fallback static, kartu besar |
 | ⏳ Countdown | Hitung mundur ke waktu shalat berikutnya |
 | 🔔 Notifikasi Adzan | Overlay + audio adzan.mp3 |
-| ⏱ Countdown Iqomah | Bisa diatur per waktu shalat (ditutup dengan tulisan WAKTU IQOMAH) |
+| ⏱ Countdown Iqomah | Bisa diatur per waktu shalat (ditutup dengan tulisan WAKTU IQOMAH berukuran besar) |
 | 🌅 Waktu Dhuha | Hitung mundur otomatis dari waktu Syuruq ke masuknya waktu Dhuha |
 | 📢 Khutbah Jum'at | Notifikasi otomatis selama Khutbah pada hari Jum'at (durasi dapat diatur) |
-| 🖼️ Slideshow | Auto-loop gambar dari folder /slides |
+| � Jadwal Kajian Rutin | Papan jadwal kajian bergilir (format: Jadwal \| Judul \| Ustadz), dapat diedit takmir |
+| 📣 Pengumuman Berjalan | Marquee vertikal (bergulir ke atas per baris), teks panjang otomatis menyesuaikan agar tetap 1 baris |
+| �🖼️ Slideshow | Auto-loop gambar dari folder /slides |
+| 🔄 Auto Refresh Harian | Memuat ulang halaman otomatis pada jam tertentu (default 00:00) tanpa perlu refresh manual |
 | ⚙️ Pengaturan | Modal UI, identitas, durasi dinamis, tersimpan di localStorage |
+
+---
+
+## 🆕 Pembaruan Terbaru
+
+- **Layout fluid untuk TV** — seluruh ukuran (jam, jadwal, teks) memakai `clamp()` + `min(vw, vh)` dan layout flex setinggi layar, sehingga tidak ada lagi konten terpotong saat masuk *fullscreen* di TV dengan resolusi/skala berbeda.
+- **Tanggal satu baris** — Masehi & Hijriyah kini sebaris, dipisah `|`, dengan font lebih besar.
+- **Papan Jadwal Kajian Rutin** — menggantikan kotak "Nasihat & Info". Menampilkan kajian bergilir dengan format `Jadwal | Judul | Ustadz`.
+- **Pengumuman berjalan vertikal** — bar pengumuman di bawah bergulir ke atas per baris; baris panjang (mis. ayat) otomatis dikecilkan agar tetap satu baris.
+- **Teks "WAKTU IQOMAH" diperbesar** saat hitung mundur iqomah selesai.
+- **Jadwal shalat lebih besar** — judul "Jadwal Shalat — Kota Solo" dihilangkan, kartu & angka waktu diperbesar.
+- **Auto Refresh Harian** — halaman dimuat ulang otomatis pada jam yang dapat diatur (default 00:00), memudahkan penerapan pembaruan tanpa refresh manual di TV.
 
 ---
 
@@ -78,12 +94,14 @@ Tambahkan gambar ke folder `/slides/` dengan nama:
 Buka dengan klik tombol **⚙️** di pojok kiri atas:
 
 - **Identitas Masjid** — Ganti nama masjid pada header utama
-- **Nasihat & Info** — Ganti teks berjalan/berputar pada info board
+- **Jadwal Kajian Rutin** — Daftar kajian (format: `Jadwal | Judul | Ustadz`, satu baris satu kajian) yang tampil bergantian + interval pergantian
+- **Pengumuman Berjalan** — Teks pengumuman marquee (satu baris = satu pengumuman) + interval pergantian
 - **Durasi Iqomah** — Atur per waktu shalat (dalam menit)
 - **Durasi Tambahan** — Atur rentang waktu Syuruq ke Dhuha dan durasi peringatan Khutbah Jum'at
 - **Toggle Suara & Iqomah** — Aktif/nonaktifkan audio dan fungsi countdown iqomah
 - **Test Buttons** — Tombol simulasi untuk *Test Adzan*, *Test Iqomah*, *Test Jumat*, dan *Test Dhuha*
-- **Interval Slideshow** — Ganti durasi tiap slide (detik)
+- **Slideshow** — Jumlah slide & interval tiap slide (detik)
+- **Auto Refresh Harian** — Aktif/nonaktif + atur jam halaman dimuat ulang otomatis (default 00:00)
 
 Semua pengaturan disimpan otomatis ke `localStorage`.
 
@@ -110,26 +128,25 @@ Semua pengaturan disimpan otomatis ke `localStorage`.
 ## 📐 Layout (16:9)
 
 ```
-┌─────────────────────────────────────────────┐
-│ ⚙️ Masjid Al Ikhlas Adi Sucipto             │ ← Top Bar
-├────────────────┬────────────────────────────┤
-│  ┌──────────┐  │                            │
-│  │  Jam     │  │       SLIDESHOW            │
-│  │  Besar   │  │       (Poster Dakwah)      │
-│  └──────────┘  │                            │
-│  ┌──────────┐  │                            │
-│  │ Countdown│  │                            │
-│  └──────────┘  │                            │
-│  ┌──────────┐  │                            │
-│  │ Shalat   │  │                            │
-│  │ Berikut  │  │                            │
-│  └──────────┘  │                            │
-│  ┌──────────┐  │                            │
-│  │ Hadith   │  │                            │
-│  └──────────┘  │                            │
-├─────────────────────────────────────────────┤
-│ Imsak │ Subuh │ Terbit │ Dzuhur │ Ashar │ Maghrib │ Isya │ ← Bottom
-└─────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────┐
+│ ⚙️ ⛶  Masjid Al Ikhlas    │  Senin, 13 Juli | 28 Muharram │ ← Top Bar
+├────────────────┬──────────────────────────────────────┤
+│  ┌──────────┐  │                                       │
+│  │  Jam     │  │            SLIDESHOW                  │
+│  │  Besar   │  │          (Poster Dakwah)              │
+│  └──────────┘  │                                       │
+│  ┌──────────┐  │                                       │
+│  │ Countdown│  │                                       │
+│  └──────────┘  │                                       │
+│  ┌──────────┐  │                                       │
+│  │  Jadwal  │  │                                       │
+│  │  Kajian  │  │                                       │
+│  └──────────┘  │                                       │
+├───────────────────────────────────────────────────────┤
+│  Subuh │ Terbit │ Dzuhur │ Ashar │ Maghrib │ Isya      │ ← Jadwal Shalat
+├───────────────────────────────────────────────────────┤
+│ 📣 PENGUMUMAN   teks berjalan vertikal (scroll ke atas) │ ← Marquee
+└───────────────────────────────────────────────────────┘
 ```
 
 ---

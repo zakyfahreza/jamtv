@@ -47,6 +47,7 @@
   <!-- Kanan: Tanggal -->
   <div class="topbar-date">
     <div class="topbar-date-masehi" id="topbar-date-masehi">Memuat…</div>
+    <span class="topbar-date-sep">|</span>
     <div class="topbar-date-hijri" id="topbar-date-hijri">— H</div>
   </div>
 
@@ -88,10 +89,14 @@
       </div>
     </div>
 
-    <!-- Nasihat / Info Tambahan -->
-    <div id="nasihat-card">
-      <div id="nasihat-label">📌 NASIHAT &amp; INFO</div>
-      <div id="nasihat-text">Mohon menonaktifkan telepon genggam saat berada di dalam Masjid.</div>
+    <!-- Jadwal Kajian Rutin -->
+    <div id="kajian-card">
+      <div id="kajian-label">📖 JADWAL KAJIAN RUTIN</div>
+      <div id="kajian-content">
+        <div id="kajian-schedule">—</div>
+        <div id="kajian-topic">—</div>
+        <div id="kajian-ustadz"></div>
+      </div>
     </div>
 
   </div><!-- end left-panel -->
@@ -110,9 +115,20 @@
      🕌 JADWAL SHALAT (Bottom Bar)
 ================================================ -->
 <div id="bottom-bar">
-  <div id="bottom-title">Jadwal Shalat — Kota Solo (WIB)</div>
   <div id="prayer-schedule">
     <!-- Prayer cards rendered by JS -->
+  </div>
+</div>
+
+<!-- ================================================
+     📣 MARQUEE PENGUMUMAN (scroll ke atas per baris)
+================================================ -->
+<div id="marquee-bar">
+  <span id="marquee-label">📣 PENGUMUMAN</span>
+  <div id="marquee-viewport">
+    <div id="marquee-track">
+      <!-- Baris pengumuman diisi oleh JS -->
+    </div>
   </div>
 </div>
 
@@ -134,15 +150,15 @@
     <div class="iq-title">IQOMAH</div>
     <div class="iq-name">Dzuhur</div>
     <div class="iq-text">Segera berwudhu &amp; membentuk shaf</div>
-    <div id="iqomah-timer-display" style="font-family:'Poppins',sans-serif; font-size:180px; font-weight:800; color:var(--accent-gold); margin:20px 0;">00:00</div>
+    <div id="iqomah-timer-display" style="font-family:'Poppins',sans-serif; font-size:clamp(80px, 18vw, 220px); font-weight:800; color:var(--accent-gold); margin:20px 0; line-height:1;">00:00</div>
   </div>
 
-  <div id="iqomah-ready-container" style="display: none; flex-direction: column; align-items: center; gap: 16px; animation: fadeIn 0.5s ease;">
-    <div class="iq-title" style="color: var(--accent); font-weight: bold;">PERHATIAN</div>
-    <div class="iq-name" style="font-size: 72px; font-weight: bold; color: #ffffff; text-shadow: 0 0 40px rgba(255,255,255,0.2);">WAKTU IQOMAH</div>
-    <div class="iq-text" style="font-size: 32px; font-weight: bold; max-width: 80%; text-align: center; margin-top: 20px; line-height: 1.5; color: var(--text-primary);">
+  <div id="iqomah-ready-container" style="display: none; flex-direction: column; align-items: center; gap: clamp(14px, 2vh, 28px); animation: fadeIn 0.5s ease;">
+    <div class="iq-title" style="color: var(--accent); font-weight: bold; font-size: clamp(22px, 2.4vw, 44px);">PERHATIAN</div>
+    <div class="iq-name" style="font-size: clamp(64px, 10vw, 170px); font-weight: bold; color: #ffffff; text-shadow: 0 0 40px rgba(255,255,255,0.2); line-height: 1.05;">WAKTU IQOMAH</div>
+    <div class="iq-text" style="font-size: clamp(30px, 4vw, 72px); font-weight: bold; max-width: 85%; text-align: center; margin-top: clamp(10px, 2vh, 28px); line-height: 1.4; color: var(--text-primary);">
       Luruskan dan rapatkan shaf kalian.<br>
-      <span style="font-size: 24px; color: var(--accent-gold); display: block; margin-top: 10px; font-style: italic;">
+      <span style="font-size: clamp(22px, 2.6vw, 46px); color: var(--accent-gold); display: block; margin-top: clamp(8px, 1.5vh, 18px); font-style: italic;">
         "Karena lurus dan rapatnya shaf termasuk kesempurnaan shalat."
       </span>
     </div>
@@ -196,16 +212,29 @@
       </div>
     </div>
 
-    <!-- Info / Nasihat -->
+    <!-- Jadwal Kajian Rutin -->
     <div class="modal-section">
-      <div class="modal-section-title">📌 Nasihat &amp; Info Masjid</div>
+      <div class="modal-section-title">📖 Jadwal Kajian Rutin</div>
       <div class="form-row" style="flex-direction:column; align-items:flex-start; gap:6px;">
-        <label class="form-label" for="input-nasihat">Teks Nasihat <small style="font-weight:normal;color:#999">(Pisahkan dengan baris baru untuk info bergantian)</small></label>
-        <textarea id="input-nasihat" class="form-input wide" rows="4" placeholder="Mari makmurkan masjid...&#10;&#10;Jangan lupa membaca Al-Qur'an..."></textarea>
+        <label class="form-label" for="input-kajian">Daftar Kajian <small style="font-weight:normal;color:#999">(Satu baris = satu kajian. Format: <b>Jadwal | Judul | Ustadz</b>)</small></label>
+        <textarea id="input-kajian" class="form-input wide" rows="5" placeholder="Ahad ba'da Subuh | Kajian Tafsir | Ust. Abdullah&#10;Senin ba'da Maghrib | Kajian Fiqih | Ust. Ahmad"></textarea>
       </div>
       <div class="form-row" style="margin-top: 10px;">
-        <label class="form-label" for="input-nasihat-interval">Lama tampil (detik)</label>
-        <input type="number" id="input-nasihat-interval" class="form-input" min="3" max="60" value="10" />
+        <label class="form-label" for="input-kajian-interval">Ganti kajian tiap (detik)</label>
+        <input type="number" id="input-kajian-interval" class="form-input" min="3" max="60" value="8" />
+      </div>
+    </div>
+
+    <!-- Marquee Pengumuman -->
+    <div class="modal-section">
+      <div class="modal-section-title">📣 Pengumuman Berjalan (Bawah)</div>
+      <div class="form-row" style="flex-direction:column; align-items:flex-start; gap:6px;">
+        <label class="form-label" for="input-marquee">Teks Pengumuman <small style="font-weight:normal;color:#999">(Satu baris = satu pengumuman, bergulir ke atas bergantian)</small></label>
+        <textarea id="input-marquee" class="form-input wide" rows="4" placeholder="Kajian rutin malam Ahad ba'da Maghrib&#10;Infaq dapat disalurkan melalui kotak amal"></textarea>
+      </div>
+      <div class="form-row" style="margin-top: 10px;">
+        <label class="form-label" for="input-marquee-interval">Ganti baris tiap (detik)</label>
+        <input type="number" id="input-marquee-interval" class="form-input" min="3" max="60" value="6" />
       </div>
     </div>
 
@@ -296,7 +325,24 @@
       </div>
     </div>
 
-
+    <!-- Auto Refresh -->
+    <div class="modal-section">
+      <div class="modal-section-title">🔄 Auto Refresh Harian</div>
+      <div class="form-row">
+        <label class="form-label">Aktifkan Auto Refresh</label>
+        <div class="toggle-wrap">
+          <label class="toggle">
+            <input type="checkbox" id="toggle-auto-refresh" checked />
+            <span class="toggle-slider"></span>
+          </label>
+          <span class="toggle-label">Aktif</span>
+        </div>
+      </div>
+      <div class="form-row" style="margin-top: 10px;">
+        <label class="form-label" for="input-auto-refresh-time">Jam Refresh <small style="font-weight:normal;color:#999">(memuat ulang halaman otomatis)</small></label>
+        <input type="time" id="input-auto-refresh-time" class="form-input" value="00:00" />
+      </div>
+    </div>
 
     <button class="btn-save" id="btn-save-settings">💾 Simpan Pengaturan</button>
   </div>
